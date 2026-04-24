@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=DM+Sans:wght@300;400;500;600&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --ink: var(--color-text-primary);
+    --muted: var(--color-text-secondary);
+    --hint: var(--color-text-tertiary);
+    --surface: var(--color-background-primary);
+    --raised: var(--color-background-secondary);
+    --border: var(--color-border-tertiary);
+    --border2: var(--color-border-secondary);
+    --pos: #1D9E75;
+    --neg: #D85A30;
+    --neu: #888780;
+    --accent: #7F77DD;
+  }
+
+  body { font-family: 'DM Sans', sans-serif; background: transparent; color: var(--ink); }
+
+  .page { max-width: 680px; margin: 0 auto; padding: 0 0 2rem; }
+
+  /* Hero */
+  .hero { padding: 2rem 0 1.5rem; border-bottom: 0.5px solid var(--border); margin-bottom: 1.5rem; }
+  .hero-tag { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--accent); letter-spacing: .08em; text-transform: uppercase; margin-bottom: .5rem; }
+  .hero h1 { font-size: 22px; font-weight: 500; line-height: 1.3; margin-bottom: .5rem; }
+  .hero-sub { font-size: 14px; color: var(--muted); line-height: 1.6; }
+  .tech-stack { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 1rem; }
+  .chip { font-family: 'JetBrains Mono', monospace; font-size: 11px; padding: 3px 10px; border-radius: 99px; background: var(--raised); border: 0.5px solid var(--border2); color: var(--muted); }
+
+  /* Metrics */
+  .section-label { font-size: 11px; font-weight: 500; color: var(--hint); text-transform: uppercase; letter-spacing: .1em; margin-bottom: .75rem; }
+  .metrics-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 1.5rem; }
+  .metric-card { background: var(--raised); border-radius: 10px; padding: .75rem; text-align: center; }
+  .metric-val { font-size: 22px; font-weight: 500; line-height: 1; margin-bottom: 4px; }
+  .metric-lbl { font-size: 11px; color: var(--muted); }
+  .metric-card.accent .metric-val { color: var(--accent); }
+  .metric-card.pos .metric-val { color: var(--pos); }
+  .metric-card.neg .metric-val { color: var(--neg); }
+  .metric-card.neu .metric-val { color: var(--neu); }
+
+  /* Comparison bar */
+  .comparison { background: var(--raised); border-radius: 12px; padding: 1rem 1.25rem; margin-bottom: 1.5rem; }
+  .cmp-row { margin-bottom: .75rem; }
+  .cmp-row:last-child { margin-bottom: 0; }
+  .cmp-header { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+  .cmp-header .val { font-weight: 500; color: var(--ink); }
+  .bar-track { background: var(--border); border-radius: 99px; height: 6px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 99px; transition: width .8s cubic-bezier(.4,0,.2,1); }
+  .bar-bert { background: var(--accent); }
+  .bar-base { background: var(--neu); }
+
+  /* Architecture SVG */
+  .arch-wrap { background: var(--raised); border-radius: 12px; padding: 1rem 1rem .5rem; margin-bottom: 1.5rem; overflow: hidden; }
+
+  /* Pipeline steps */
+  .pipeline { display: flex; align-items: stretch; gap: 0; margin-bottom: 1.5rem; }
+  .pipe-step { flex: 1; background: var(--raised); border: 0.5px solid var(--border); padding: .75rem .6rem; text-align: center; position: relative; }
+  .pipe-step:first-child { border-radius: 10px 0 0 10px; }
+  .pipe-step:last-child { border-radius: 0 10px 10px 0; }
+  .pipe-step::after { content: '→'; position: absolute; right: -9px; top: 50%; transform: translateY(-50%); font-size: 12px; color: var(--hint); z-index: 1; }
+  .pipe-step:last-child::after { display: none; }
+  .pipe-icon { font-size: 16px; margin-bottom: 4px; }
+  .pipe-name { font-size: 11px; font-weight: 500; color: var(--ink); }
+  .pipe-sub { font-size: 10px; color: var(--muted); margin-top: 2px; }
+
+  /* Demo */
+  .demo-box { background: var(--raised); border-radius: 12px; padding: 1.25rem; margin-bottom: 1.5rem; border: 0.5px solid var(--border); }
+  .demo-samples { display: flex; flex-direction: column; gap: 6px; margin-bottom: 1rem; }
+  .sample-btn { text-align: left; background: var(--surface); border: 0.5px solid var(--border2); border-radius: 8px; padding: .5rem .75rem; font-size: 12px; color: var(--muted); cursor: pointer; transition: border-color .15s, color .15s; font-family: 'DM Sans', sans-serif; }
+  .sample-btn:hover { border-color: var(--accent); color: var(--ink); }
+  .sample-btn.active { border-color: var(--accent); color: var(--ink); background: var(--raised); }
+  textarea { width: 100%; resize: none; border: 0.5px solid var(--border2); border-radius: 8px; padding: .6rem .75rem; font-size: 13px; font-family: 'DM Sans', sans-serif; background: var(--surface); color: var(--ink); outline: none; height: 72px; transition: border-color .15s; }
+  textarea:focus { border-color: var(--accent); }
+  .analyze-btn { margin-top: 8px; width: 100%; padding: .6rem; border: 0.5px solid var(--border2); border-radius: 8px; background: transparent; color: var(--ink); font-size: 13px; font-weight: 500; cursor: pointer; transition: background .15s; font-family: 'DM Sans', sans-serif; }
+  .analyze-btn:hover { background: var(--surface); }
+
+  .result { margin-top: 1rem; display: none; }
+  .result.show { display: block; }
+  .result-label { font-size: 11px; color: var(--muted); margin-bottom: .5rem; }
+  .bars-wrap { display: flex; flex-direction: column; gap: 6px; }
+  .r-row { display: flex; align-items: center; gap: 8px; font-size: 12px; }
+  .r-name { width: 56px; color: var(--muted); text-align: right; font-size: 11px; }
+  .r-track { flex: 1; background: var(--border); border-radius: 99px; height: 8px; overflow: hidden; }
+  .r-fill { height: 100%; border-radius: 99px; transition: width .5s cubic-bezier(.4,0,.2,1); }
+  .r-fill.pos { background: var(--pos); }
+  .r-fill.neu { background: var(--neu); }
+  .r-fill.neg { background: var(--neg); }
+  .r-pct { width: 36px; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--ink); }
+  .result-verdict { margin-top: .75rem; font-size: 13px; font-weight: 500; }
+
+  /* API snippet */
+  .code-box { background: #1a1a2e; border-radius: 10px; padding: 1rem; font-family: 'JetBrains Mono', monospace; font-size: 11px; line-height: 1.7; overflow-x: auto; color: #c9d1d9; }
+  .kw { color: #ff79c6; } .str { color: #f1fa8c; } .cmt { color: #6272a4; }
+  .fn { color: #8be9fd; } .num { color: #bd93f9; }
+
+  /* Docker badge */
+  .deploy-row { display: flex; gap: 8px; margin-top: 1rem; }
+  .badge { font-family: 'JetBrains Mono', monospace; font-size: 10px; padding: 4px 10px; border-radius: 6px; border: 0.5px solid var(--border2); color: var(--muted); display: flex; align-items: center; gap: 5px; }
+  .badge-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--pos); }
+
+  .divider { border: none; border-top: 0.5px solid var(--border); margin: 1.25rem 0; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- Hero -->
+  <div class="hero">
+    <div class="hero-tag">NLP · Deep Learning · MLOps</div>
+    <h1>Sentiment Analysis on Product Reviews<br>using Fine-tuned BERT</h1>
+    <p class="hero-sub">Fine-tuned bert-base-uncased on 50,000 Amazon Product Reviews for 3-class sentiment classification — outperforming the TF-IDF + Logistic Regression baseline by 11 percentage points.</p>
+    <div class="tech-stack">
+      <span class="chip">Python</span>
+      <span class="chip">HuggingFace Transformers</span>
+      <span class="chip">BERT</span>
+      <span class="chip">PyTorch</span>
+      <span class="chip">FastAPI</span>
+      <span class="chip">Docker</span>
+    </div>
+  </div>
+
+  <!-- Metrics -->
+  <div class="section-label">Model Performance</div>
+  <div class="metrics-grid">
+    <div class="metric-card accent">
+      <div class="metric-val">89%</div>
+      <div class="metric-lbl">Accuracy</div>
+    </div>
+    <div class="metric-card pos">
+      <div class="metric-val">0.88</div>
+      <div class="metric-lbl">Weighted F1</div>
+    </div>
+    <div class="metric-card neg">
+      <div class="metric-val">50K</div>
+      <div class="metric-lbl">Train Samples</div>
+    </div>
+    <div class="metric-card neu">
+      <div class="metric-val">3</div>
+      <div class="metric-lbl">Classes</div>
+    </div>
+  </div>
+
+  <!-- Comparison -->
+  <div class="section-label">BERT vs Baseline</div>
+  <div class="comparison">
+    <div class="cmp-row">
+      <div class="cmp-header"><span>Fine-tuned BERT (bert-base-uncased)</span><span class="val">89%</span></div>
+      <div class="bar-track"><div class="bar-fill bar-bert" style="width:89%"></div></div>
+    </div>
+    <div class="cmp-row">
+      <div class="cmp-header"><span>Baseline — TF-IDF + Logistic Regression</span><span class="val">78%</span></div>
+      <div class="bar-track"><div class="bar-fill bar-base" style="width:78%"></div></div>
+    </div>
+  </div>
+
+  <!-- Pipeline -->
+  <div class="section-label">Pipeline</div>
+  <div class="pipeline">
+    <div class="pipe-step">
+      <div class="pipe-icon">📦</div>
+      <div class="pipe-name">Dataset</div>
+      <div class="pipe-sub">Amazon Reviews</div>
+    </div>
+    <div class="pipe-step">
+      <div class="pipe-icon">✂️</div>
+      <div class="pipe-name">Tokenise</div>
+      <div class="pipe-sub">BERT WordPiece</div>
+    </div>
+    <div class="pipe-step">
+      <div class="pipe-icon">🧠</div>
+      <div class="pipe-name">Fine-tune</div>
+      <div class="pipe-sub">3 Epochs</div>
+    </div>
+    <div class="pipe-step">
+      <div class="pipe-icon">⚡</div>
+      <div class="pipe-name">FastAPI</div>
+      <div class="pipe-sub">REST Endpoint</div>
+    </div>
+    <div class="pipe-step">
+      <div class="pipe-icon">🐳</div>
+      <div class="pipe-name">Docker</div>
+      <div class="pipe-sub">Containerised</div>
+    </div>
+  </div>
+
+  <!-- BERT Architecture -->
+  <div class="section-label">Model Architecture</div>
+  <div class="arch-wrap">
+    <svg width="100%" viewBox="0 0 640 210" role="img">
+      <title>BERT fine-tuning architecture</title>
+      <desc>Shows input tokens flowing through BERT encoder layers to a classification head producing 3 sentiment classes.</desc>
+      <defs>
+        <marker id="ar2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </marker>
+      </defs>
+
+      <!-- Input tokens -->
+      <rect x="10" y="80" width="56" height="28" rx="6" fill="#534AB7" fill-opacity=".15" stroke="#534AB7" stroke-width="0.5"/>
+      <text x="38" y="98" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" fill="#534AB7">[CLS]</text>
+      <rect x="72" y="80" width="56" height="28" rx="6" fill="#534AB7" fill-opacity=".08" stroke="#534AB7" stroke-width="0.5" stroke-opacity=".5"/>
+      <text x="100" y="98" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" fill="#534AB7">great</text>
+      <rect x="134" y="80" width="56" height="28" rx="6" fill="#534AB7" fill-opacity=".08" stroke="#534AB7" stroke-width="0.5" stroke-opacity=".5"/>
+      <text x="162" y="98" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" fill="#534AB7">prod</text>
+
+      <text x="205" y="98" text-anchor="middle" font-family="DM Sans, sans-serif" font-size="14" fill="#888780">…</text>
+
+      <text x="100" y="130" text-anchor="middle" font-family="DM Sans, sans-serif" font-size="10" fill="#888780">Input tokens</text>
+
+      <!-- Arrow -->
+      <line x1="228" y1="93" x2="258" y2="93" stroke="#888780" stroke-width="0.8" marker-end="url(#ar2)"/>
+
+      <!-- BERT encoder box -->
+      <rect x="262" y="20" width="160" height="150" rx="10" fill="#534AB7" fill-opacity=".07" stroke="#534AB7" stroke-width="0.5"/>
+      <text x="342" y="44" text-anchor="middle" font-family="DM Sans, sans-serif" font-size="12" font-weight="500" fill="#534AB7">BERT Encoder</text>
+      <text x="342" y="60" text-anchor="middle" font-family="DM Sans, sans-serif" font-size="10" fill="#888780">bert-base-uncased</text>
+
+      <!-- 3 transformer blocks inside BERT -->
+      <rect x="278" y="70" width="128" height="24" rx="5" fill="#534AB7" fill-opacity=".15" stroke="#534AB7" stroke-width="0.5"/>
+      <text x="342" y="86" text-anchor="middle" font-family="DM Sans, sans-serif" font-size="10" fill="#534AB7">Transformer Block × 12</text>
+      <rect x="278" y="100" width="128" height="24" rx="5" fill="#534AB7" fill-opacity=".1" stroke="#534AB7" stroke-width="0.5" stroke-dasharray="3 2"/>
+      <text x="342" y="116" text-anchor="middle" font-family="DM Sans, sans-serif" font-size="10" fill="#534AB7">Self-Attention</text>
+      <rect x="278" y="130" width="128" height="24" rx="5" fill="#534AB7" fill-opacity=".1" stroke="#534AB7" stroke-width="0.5" stroke-dasharray="3 2"/>
+      <text x="342" y="146" text-anchor="middle" font-family="DM Sans, sans-serif" font-size="10" fill="#534AB7">Feed-Forward</text>
+
+      <!-- CLS representation -->
+      <text x="342" y="182" text-anchor="middle" font-family="DM Sans, sans-serif" font-size="10" fill="#888780">768-dim [CLS] representation</text>
+
+      <!-- Arrow -->
+      <line x1="424" y1="93" x2="454" y2="93" stroke="#888780" stroke-width="0.8" marker-end="url(#ar2)"/>
+
+      <!-- Classification head -->
+      <rect x="458" y="60" width="120" height="64" rx="10" fill="#1D9E75" fill-opacity=".08" stroke="#1D9E75" stroke-width="0.5"/>
+      <text x="518" y="80" text-anchor="middle" font-family="DM Sans, sans-serif" font-size="11" font-weight="500" fill="#1D9E75">Classifier</text>
+      <text x="518" y="96" text-anchor="middle" font-family="DM Sans, sans-serif" font-size="10" fill="#888780">Dropout + Linear</text>
+      <text x="518" y="112" text-anchor="middle" font-family="DM Sans, sans-serif" font-size="10" fill="#888780">Softmax → 3 classes</text>
+
+      <!-- Output labels -->
+      <line x1="578" y1="73" x2="608" y2="55" stroke="#1D9E75" stroke-width="0.5" stroke-dasharray="3 2"/>
+      <text x="612" y="58" font-family="DM Sans, sans-serif" font-size="10" fill="#1D9E75">Positive</text>
+      <line x1="578" y1="92" x2="608" y2="92" stroke="#888780" stroke-width="0.5" stroke-dasharray="3 2"/>
+      <text x="612" y="95" font-family="DM Sans, sans-serif" font-size="10" fill="#888780">Neutral</text>
+      <line x1="578" y1="111" x2="608" y2="129" stroke="#D85A30" stroke-width="0.5" stroke-dasharray="3 2"/>
+      <text x="612" y="132" font-family="DM Sans, sans-serif" font-size="10" fill="#D85A30">Negative</text>
+    </svg>
+  </div>
+
+  <!-- Interactive Demo -->
+  <div class="section-label">Simulated Inference Demo</div>
+  <div class="demo-box">
+    <div class="sample-samples-label" style="font-size:11px;color:var(--muted);margin-bottom:.5rem;">Try a sample review</div>
+    <div class="demo-samples">
+      <button class="sample-btn" onclick="loadSample(this, 'This product is absolutely amazing! Best purchase I have ever made.')">⭐ "This product is absolutely amazing! Best purchase I've ever made."</button>
+      <button class="sample-btn" onclick="loadSample(this, 'It is okay, nothing special. Works as described but nothing more.')">😐 "It is okay, nothing special. Works as described but nothing more."</button>
+      <button class="sample-btn" onclick="loadSample(this, 'Terrible quality. Broke after 2 days. Complete waste of money.')">⚠️ "Terrible quality. Broke after 2 days. Complete waste of money."</button>
+    </div>
+    <textarea id="review-input" placeholder="Or type your own review…"></textarea>
+    <button class="analyze-btn" onclick="analyze()">Analyze Sentiment →</button>
+
+    <div class="result" id="result">
+      <div class="result-label">Predicted class probabilities</div>
+      <div class="bars-wrap">
+        <div class="r-row">
+          <span class="r-name">Positive</span>
+          <div class="r-track"><div class="r-fill pos" id="bar-pos" style="width:0%"></div></div>
+          <span class="r-pct" id="pct-pos">0%</span>
+        </div>
+        <div class="r-row">
+          <span class="r-name">Neutral</span>
+          <div class="r-track"><div class="r-fill neu" id="bar-neu" style="width:0%"></div></div>
+          <span class="r-pct" id="pct-neu">0%</span>
+        </div>
+        <div class="r-row">
+          <span class="r-name">Negative</span>
+          <div class="r-track"><div class="r-fill neg" id="bar-neg" style="width:0%"></div></div>
+          <span class="r-pct" id="pct-neg">0%</span>
+        </div>
+      </div>
+      <div class="result-verdict" id="verdict"></div>
+    </div>
+  </div>
+
+  <!-- API snippet -->
+  <div class="section-label">REST API Example</div>
+  <div class="code-box">
+<span class="cmt"># POST /predict</span><br>
+<span class="kw">import</span> requests<br><br>
+response = requests.<span class="fn">post</span>(<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="str">"http://localhost:8000/predict"</span>,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;json={<span class="str">"text"</span>: <span class="str">"Absolutely love this product!"</span>}<br>
+)<br><br>
+<span class="cmt"># Response</span><br>
+{<br>
+&nbsp;&nbsp;<span class="str">"label"</span>: <span class="str">"positive"</span>,<br>
+&nbsp;&nbsp;<span class="str">"confidence"</span>: <span class="num">0.94</span>,<br>
+&nbsp;&nbsp;<span class="str">"probabilities"</span>: {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="str">"positive"</span>: <span class="num">0.94</span>, <span class="str">"neutral"</span>: <span class="num">0.04</span>, <span class="str">"negative"</span>: <span class="num">0.02</span><br>
+&nbsp;&nbsp;}<br>
+}
+  </div>
+
+  <div class="deploy-row">
+    <div class="badge"><div class="badge-dot"></div>FastAPI /predict endpoint</div>
+    <div class="badge"><div class="badge-dot"></div>Docker containerised</div>
+    <div class="badge"><div class="badge-dot"></div>Tested with Postman</div>
+  </div>
+
+</div>
+
+<script>
+  function loadSample(btn, text) {
+    document.querySelectorAll('.sample-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('review-input').value = text;
+  }
+
+  const heuristics = [
+    { words: ['amazing','love','excellent','best','great','fantastic','wonderful','perfect','awesome','superb','outstanding'], bias: [0.88, 0.08, 0.04] },
+    { words: ['terrible','awful','broke','worst','horrible','waste','broken','useless','disappointed','bad'], bias: [0.04, 0.08, 0.88] },
+    { words: ['okay','ok','average','decent','fine','alright','nothing special','works','described'], bias: [0.15, 0.72, 0.13] },
+  ];
+
+  function softmax(arr) {
+    const max = Math.max(...arr);
+    const exp = arr.map(x => Math.exp(x - max));
+    const sum = exp.reduce((a,b)=>a+b,0);
+    return exp.map(x=>x/sum);
+  }
+
+  function analyze() {
+    const text = document.getElementById('review-input').value.trim();
+    if (!text) return;
+
+    const lower = text.toLowerCase();
+    let scores = [0,0,0];
+    let matched = false;
+
+    for (const h of heuristics) {
+      for (const w of h.words) {
+        if (lower.includes(w)) {
+          scores = scores.map((s,i) => s + h.bias[i]);
+          matched = true;
+        }
+      }
+    }
+
+    if (!matched) scores = [0.33,0.34,0.33];
+
+    const probs = softmax(scores);
+    const pPos = Math.round(probs[0]*100);
+    const pNeu = Math.round(probs[1]*100);
+    const pNeg = Math.round(probs[2]*100);
+
+    document.getElementById('bar-pos').style.width = pPos+'%';
+    document.getElementById('bar-neu').style.width = pNeu+'%';
+    document.getElementById('bar-neg').style.width = pNeg+'%';
+    document.getElementById('pct-pos').textContent = pPos+'%';
+    document.getElementById('pct-neu').textContent = pNeu+'%';
+    document.getElementById('pct-neg').textContent = pNeg+'%';
+
+    const maxP = Math.max(pPos,pNeu,pNeg);
+    let verdict = '', color = '';
+    if (maxP === pPos) { verdict = '✓ Predicted: Positive'; color = 'var(--pos)'; }
+    else if (maxP === pNeu) { verdict = '◉ Predicted: Neutral'; color = 'var(--neu)'; }
+    else { verdict = '✗ Predicted: Negative'; color = 'var(--neg)'; }
+
+    const v = document.getElementById('verdict');
+    v.textContent = verdict;
+    v.style.color = color;
+
+    document.getElementById('result').classList.add('show');
+  }
+</script>
+</body>
+</html>
